@@ -16,17 +16,13 @@
 
 ## 📥 快速下载
 
-[v0.2.2 Release](https://github.com/hellodannyliu/bilibili-video-downloader/releases/tag/v0.2.2) 提供已经编译好的安装包，直接下载即可使用。这一版包含哔哩哔哩下载，以及 YouTube 视频、频道和播放列表下载。
+[v0.2.2 Release](https://github.com/hellodannyliu/bilibili-video-downloader/releases/tag/v0.2.2) 提供已经编译好的 Linux x86_64 安装包，直接下载即可使用。这一版包含哔哩哔哩下载，以及 YouTube 视频、频道和播放列表下载。
 
-| 系统             | 下载                                                                                                                                                                                                           |
-| :--------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Windows 安装包   | [bilibili-video-downloader_0.2.2_windows_x64.exe](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_windows_x64.exe)                         |
-| Windows 便携版   | [bilibili-video-downloader_0.2.2_windows_x64_portable.zip](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_windows_x64_portable.zip)       |
-| Linux .deb       | [bilibili-video-downloader_0.2.2_linux_amd64.deb](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_linux_amd64.deb)                         |
-| Linux .rpm       | [bilibili-video-downloader_0.2.2_linux_amd64.rpm](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_linux_amd64.rpm)                         |
-| Linux 便携版     | [bilibili-video-downloader_0.2.2_linux_amd64_portable.tar.gz](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_linux_amd64_portable.tar.gz) |
-| macOS Apple 芯片 | [bilibili-video-downloader_0.2.2_macos_aarch64.dmg](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_macos_aarch64.dmg)                     |
-| macOS Intel      | [bilibili-video-downloader_0.2.2_macos_x86_64.dmg](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_macos_x86_64.dmg)                       |
+| 系统                          | 下载                                                                                                                                                                                                           |
+| :---------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Linux .deb（Debian / Ubuntu） | [bilibili-video-downloader_0.2.2_linux_amd64.deb](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_linux_amd64.deb)                         |
+| Linux .rpm                    | [bilibili-video-downloader_0.2.2_linux_amd64.rpm](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_linux_amd64.rpm)                         |
+| Linux 便携版                  | [bilibili-video-downloader_0.2.2_linux_amd64_portable.tar.gz](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_linux_amd64_portable.tar.gz) |
 
 **如果本项目对你有帮助，欢迎点个 Star ⭐ 支持！你的支持是我持续更新维护的动力 🙏**
 
@@ -174,17 +170,13 @@ Search for a YouTube downloader, YouTube to MP4, YouTube channel downloader, or 
 
 ## 📥 Download
 
-Prebuilt installers for [v0.2.2](https://github.com/hellodannyliu/bilibili-video-downloader/releases/tag/v0.2.2) include Bilibili downloads and YouTube video, channel, and playlist downloads.
+[v0.2.2](https://github.com/hellodannyliu/bilibili-video-downloader/releases/tag/v0.2.2) has compiled Linux x86_64 packages. This build downloads Bilibili videos and YouTube videos, channels, and playlists.
 
-| System              | Download                                                                                                                                                                                                       |
-| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Windows installer   | [bilibili-video-downloader_0.2.2_windows_x64.exe](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_windows_x64.exe)                         |
-| Windows portable    | [bilibili-video-downloader_0.2.2_windows_x64_portable.zip](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_windows_x64_portable.zip)       |
-| Linux .deb          | [bilibili-video-downloader_0.2.2_linux_amd64.deb](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_linux_amd64.deb)                         |
-| Linux .rpm          | [bilibili-video-downloader_0.2.2_linux_amd64.rpm](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_linux_amd64.rpm)                         |
-| Linux portable      | [bilibili-video-downloader_0.2.2_linux_amd64_portable.tar.gz](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_linux_amd64_portable.tar.gz) |
-| macOS Apple silicon | [bilibili-video-downloader_0.2.2_macos_aarch64.dmg](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_macos_aarch64.dmg)                     |
-| macOS Intel         | [bilibili-video-downloader_0.2.2_macos_x86_64.dmg](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_macos_x86_64.dmg)                       |
+| System                       | Download                                                                                                                                                                                                       |
+| :--------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Linux .deb (Debian / Ubuntu) | [bilibili-video-downloader_0.2.2_linux_amd64.deb](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_linux_amd64.deb)                         |
+| Linux .rpm                   | [bilibili-video-downloader_0.2.2_linux_amd64.rpm](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_linux_amd64.rpm)                         |
+| Linux portable               | [bilibili-video-downloader_0.2.2_linux_amd64_portable.tar.gz](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_linux_amd64_portable.tar.gz) |
 
 **If this project helps you, a Star ⭐ really helps it stay maintained.**
 
