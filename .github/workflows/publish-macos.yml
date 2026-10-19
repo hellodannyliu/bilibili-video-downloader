@@ -1,0 +1,92 @@
+name: publish-macos
+
+on:
+  workflow_dispatch:
+
+env:
+  REPO_NAME: bilibili-video-downloader
+
+jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    outputs:
+      VERSION: ${{ steps.get_version.outputs.VERSION }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version number
+        id: get_version
+        run: |
+          VERSION=$(jq -r '.version' src-tauri/tauri.conf.json)
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+  macos-build:
+    needs: get-version
+    env:
+      VERSION: ${{ needs.get-version.outputs.VERSION }}
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [aarch64, x86_64]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.arch }}-apple-darwin
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Install frontend dependencies
+        run: pnpm install
+
+      - name: Build tauri app
+        uses: tauri-apps/tauri-action@v0
+        with:
+          args: --target ${{ matrix.arch }}-apple-darwin
+
+      - name: Create artifacts directory
+        run: mkdir -p artifacts
+
+      - name: Copy dmg to release assets
+        env:
+          ARCH_ALIAS: ${{ matrix.arch == 'x86_64' && 'x64' || matrix.arch }}
+        run: |
+          ls -la "src-tauri/target/${{ matrix.arch }}-apple-darwin/release/bundle/dmg"
+          cp "src-tauri/target/${{ matrix.arch }}-apple-darwin/release/bundle/dmg/${{ env.REPO_NAME }}_${{ env.VERSION }}_${{ env.ARCH_ALIAS }}.dmg" "artifacts/${{ env.REPO_NAME }}_${{ env.VERSION }}_macos_${{ matrix.arch }}.dmg"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-assets-${{ matrix.arch }}
+          path: artifacts/*
+
+  upload:
+    needs: [get-version, macos-build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download macOS assets
+        uses: actions/download-artifact@v4
+        with:
+          pattern: macos-assets-*
+          path: artifacts
+
+      - name: Attach DMGs to the existing release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.get-version.outputs.VERSION }}
+        run: |
+          find artifacts -name '*.dmg' -print
+          find artifacts -name '*.dmg' -print0 | xargs -0 gh release upload "v${VERSION}" --clobber
