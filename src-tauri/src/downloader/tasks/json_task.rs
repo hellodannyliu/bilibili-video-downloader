@@ -51,6 +51,9 @@ impl JsonTask {
             EpisodeInfo::Cheese(info, _ep_id) => {
                 serde_json::to_string(&info).wrap_err("将课程信息转换为JSON失败")?
             }
+            EpisodeInfo::Youtube(info) => {
+                serde_json::to_string(&info).wrap_err("将 YouTube 视频信息转换为JSON失败")?
+            }
         };
         std::fs::write(&json_path, json_string)
             .wrap_err(format!("保存JSON到`{}`失败", json_path.display()))?;

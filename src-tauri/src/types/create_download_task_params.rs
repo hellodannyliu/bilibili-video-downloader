@@ -1,13 +1,17 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
-use super::{bangumi_info::BangumiInfo, cheese_info::CheeseInfo, normal_info::NormalInfo};
+use super::{
+    bangumi_info::BangumiInfo, cheese_info::CheeseInfo, normal_info::NormalInfo,
+    youtube::CreateYoutubeDownloadTaskParams,
+};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
 pub enum CreateDownloadTaskParams {
     Normal(CreateNormalDownloadTaskParams),
     Bangumi(CreateBangumiDownloadTaskParams),
     Cheese(CreateCheeseDownloadTaskParams),
+    Youtube(CreateYoutubeDownloadTaskParams),
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, Type)]

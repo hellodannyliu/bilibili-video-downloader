@@ -34,6 +34,7 @@ use crate::{
         codec_type::CodecType,
         normal_info::{NormalInfo, UgcSeason},
         video_quality::VideoQuality,
+        youtube::YoutubeVideoItem,
     },
 };
 
@@ -72,6 +73,7 @@ pub struct DownloadProgress {
     pub completed_ts: Option<u64>,
     pub is_drm: bool,
     pub is_preview: bool,
+    pub youtube_video_id: Option<String>,
 }
 
 impl DownloadProgress {
@@ -147,6 +149,7 @@ impl DownloadProgress {
             completed_ts: None,
             is_drm: false,
             is_preview: false,
+            youtube_video_id: None,
         };
 
         Ok(progress)
@@ -197,9 +200,142 @@ impl DownloadProgress {
             completed_ts: None,
             is_drm: false,
             is_preview: false,
+            youtube_video_id: None,
         };
 
         Ok(progress)
+    }
+
+    #[instrument(level = "error", skip_all)]
+    pub fn from_youtube(
+        app: &AppHandle,
+        item: &YoutubeVideoItem,
+        collection_title: &str,
+    ) -> eyre::Result<Self> {
+        let config = app.get_config().read().clone();
+        let mut tasks = Tasks::new(&config, &item.thumbnail);
+        tasks.danmaku.xml_selected = false;
+        tasks.danmaku.ass_selected = false;
+        tasks.danmaku.json_selected = false;
+        tasks.video_process.embed_skip_selected = false;
+
+        let create_ts = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
+        let collection_title = if collection_title.is_empty() {
+            item.channel_name.clone()
+        } else {
+            collection_title.to_string()
+        };
+        let collection_title = if collection_title.is_empty() {
+            item.title.clone()
+        } else {
+            collection_title
+        };
+
+        Ok(Self {
+            task_id: Uuid::new_v4().to_string(),
+            episode_type: EpisodeType::Youtube,
+            aid: 0,
+            bvid: None,
+            cid: 0,
+            ep_id: None,
+            duration: item.duration,
+            pub_ts: crate::youtube::parse_published_text(&item.published_text),
+            collection_title,
+            part_title: None,
+            part_order: None,
+            episode_title: item.title.clone(),
+            episode_order: if item.order > 0 { item.order } else { 1 },
+            up_name: nonempty_string(&item.channel_name),
+            up_uid: None,
+            up_avatar: nonempty_string(&item.channel_avatar),
+            episode_dir: PathBuf::new(),
+            filename: String::new(),
+            video_task: tasks.video,
+            audio_task: tasks.audio,
+            video_process_task: tasks.video_process,
+            danmaku_task: tasks.danmaku,
+            subtitle_task: tasks.subtitle,
+            cover_task: tasks.cover,
+            nfo_task: tasks.nfo,
+            json_task: tasks.json,
+            create_ts,
+            completed_ts: None,
+            is_drm: false,
+            is_preview: false,
+            youtube_video_id: Some(item.video_id.clone()),
+        })
+    }
+
+    #[instrument(level = "error", skip_all)]
+    async fn prepare_youtube(
+        &mut self,
+        app: &AppHandle,
+        video_selected: bool,
+        video_completed: bool,
+        audio_selected: bool,
+        audio_completed: bool,
+    ) -> eyre::Result<()> {
+        let video_id = self
+            .youtube_video_id
+            .clone()
+            .ok_or_eyre("progress中的youtube_video_id为None，无法获取视频链接")?;
+        let streams = app
+            .get_youtube_client()
+            .get_streams(&video_id)
+            .await
+            .wrap_err("获取 YouTube 视频流失败")?;
+        if self.duration == 0 && streams.duration > 0 {
+            self.duration = streams.duration;
+        }
+
+        let bili_client = app.get_bili_client();
+        if video_selected && !video_completed {
+            let video = streams
+                .video
+                .as_ref()
+                .ok_or_eyre("没有找到可合并的 MP4 视频流")?;
+            let content_length = if video.content_length > 0 {
+                video.content_length
+            } else {
+                bili_client
+                    .get_content_length(&video.url)
+                    .await
+                    .wrap_err("获取 YouTube 视频大小失败")?
+            };
+            self.video_task.assign_direct(
+                video.url.clone(),
+                content_length,
+                video.video_quality,
+                video.codec_type,
+            );
+            if video.includes_audio {
+                self.audio_task.completed = true;
+                self.audio_task.content_length = 0;
+            }
+        }
+
+        if self.audio_task.selected
+            && !self.audio_task.completed
+            && audio_selected
+            && !audio_completed
+        {
+            let audio = streams
+                .audio
+                .as_ref()
+                .ok_or_eyre("没有找到可合并的 M4A 音频流")?;
+            let content_length = if audio.content_length > 0 {
+                audio.content_length
+            } else {
+                bili_client
+                    .get_content_length(&audio.url)
+                    .await
+                    .wrap_err("获取 YouTube 音频大小失败")?
+            };
+            self.audio_task
+                .assign_direct(audio.url.clone(), content_length, audio.audio_quality);
+        }
+
+        Ok(())
     }
 
     #[instrument(level = "error", skip_all)]
@@ -387,6 +523,17 @@ impl DownloadProgress {
                     self.audio_task.prepare_bangumi(app, &media_url).await;
                 }
             }
+            EpisodeType::Youtube => {
+                self.prepare_youtube(
+                    app,
+                    video_selected,
+                    video_completed,
+                    audio_selected,
+                    audio_completed,
+                )
+                .await
+                .wrap_err("准备 YouTube 视频失败")?;
+            }
             EpisodeType::Cheese => {
                 let Some(ep_id) = self.ep_id else {
                     return Err(eyre!("progress中的ep_id为None，无法获取课程视频链接"));
@@ -544,6 +691,7 @@ fn create_normal_progresses_for_single(
             completed_ts: None,
             is_drm: false,
             is_preview: false,
+            youtube_video_id: None,
         };
 
         return Ok(vec![progress]);
@@ -582,6 +730,7 @@ fn create_normal_progresses_for_single(
             completed_ts: None,
             is_drm: false,
             is_preview: false,
+            youtube_video_id: None,
         };
 
         return Ok(vec![progress]);
@@ -620,6 +769,7 @@ fn create_normal_progresses_for_single(
             completed_ts: None,
             is_drm: false,
             is_preview: false,
+            youtube_video_id: None,
         };
 
         progresses.push(progress);
@@ -691,6 +841,7 @@ fn create_normal_progresses_for_season(
             completed_ts: None,
             is_drm: false,
             is_preview: false,
+            youtube_video_id: None,
         };
 
         return Ok(vec![progress]);
@@ -729,6 +880,7 @@ fn create_normal_progresses_for_season(
             completed_ts: None,
             is_drm: false,
             is_preview: false,
+            youtube_video_id: None,
         };
 
         return Ok(vec![progress]);
@@ -768,11 +920,20 @@ fn create_normal_progresses_for_season(
             completed_ts: None,
             is_drm: false,
             is_preview: false,
+            youtube_video_id: None,
         };
 
         progresses.push(progress);
     }
     Ok(progresses)
+}
+
+fn nonempty_string(value: &str) -> Option<String> {
+    if value.is_empty() {
+        None
+    } else {
+        Some(value.to_string())
+    }
 }
 
 struct Tasks {

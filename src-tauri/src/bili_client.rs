@@ -811,11 +811,16 @@ impl BiliClient {
         start: u64,
         end: u64,
     ) -> eyre::Result<Bytes> {
-        let request = self
+        let mut request = self
             .media_client
             .read()
             .get(media_url)
             .header("range", format!("bytes={start}-{end}"));
+        if let Some((referer, user_agent)) = crate::youtube::youtube_media_headers(media_url) {
+            request = request
+                .header("referer", referer)
+                .header("user-agent", user_agent);
+        }
         let http_resp = request.send().await?;
         // 检查http响应状态码
         let status = http_resp.status();
@@ -860,7 +865,12 @@ impl BiliClient {
         }
 
         // 优先使用 HEAD 获取 Content-Length
-        let request = self.content_length_client.read().head(media_url);
+        let mut request = self.content_length_client.read().head(media_url);
+        if let Some((referer, user_agent)) = crate::youtube::youtube_media_headers(media_url) {
+            request = request
+                .header("referer", referer)
+                .header("user-agent", user_agent);
+        }
         let http_resp = request.send().await?;
         let status = http_resp.status();
         if status == StatusCode::OK
@@ -870,11 +880,16 @@ impl BiliClient {
         }
 
         // 部分 upos/CDN 对 HEAD 支持不完整（尤其是高码率/高帧率流），这里降级用 Range 请求探测总大小
-        let request = self
+        let mut request = self
             .content_length_client
             .read()
             .get(media_url)
             .header("range", "bytes=0-0");
+        if let Some((referer, user_agent)) = crate::youtube::youtube_media_headers(media_url) {
+            request = request
+                .header("referer", referer)
+                .header("user-agent", user_agent);
+        }
         let http_resp = request.send().await?;
         let status = http_resp.status();
 
@@ -994,7 +1009,10 @@ impl BiliClient {
 
     #[instrument(level = "error", skip_all, fields(url = url))]
     pub async fn get_cover_data_and_ext(&self, url: &str) -> eyre::Result<(Bytes, String)> {
-        let request = self.api_client.read().get(url);
+        let mut request = self.api_client.read().get(url);
+        if url.contains("ytimg.com") || url.contains("ggpht.com") || url.contains("youtube.com") {
+            request = request.header("referer", "https://www.youtube.com/");
+        }
         let http_resp = request.send().await?;
         // 检查http响应状态码
         let status = http_resp.status();

@@ -36,3 +36,4 @@ pub mod user_info;
 pub mod user_video_info;
 pub mod video_quality;
 pub mod watch_later_info;
+pub mod youtube;

@@ -11,6 +11,7 @@ mod plugin;
 mod types;
 mod utils;
 mod wbi;
+mod youtube;
 #[allow(warnings)]
 mod protobuf {
     include!("./bilibili.community.service.dm.v1.rs");
@@ -21,9 +22,10 @@ use commands::{
     get_available_media_formats, get_bangumi_follow_info, get_bangumi_info, get_config,
     get_fav_folders, get_fav_info, get_history_info, get_logs_dir_size, get_normal_info,
     get_plugin_infos, get_qrcode_status, get_skip_segments, get_user_info, get_user_video_info,
-    get_watch_later_info, pause_download_tasks, restart_download_task, restart_download_tasks,
-    restore_download_tasks, resume_download_tasks, save_config, search, set_plugin_enabled,
-    set_plugin_priority, show_path_in_file_manager, uninstall_plugin,
+    get_watch_later_info, get_youtube_channel, get_youtube_playlist, pause_download_tasks,
+    restart_download_task, restart_download_tasks, restore_download_tasks, resume_download_tasks,
+    save_config, search, set_plugin_enabled, set_plugin_priority, show_path_in_file_manager,
+    uninstall_plugin,
 };
 use eyre::WrapErr;
 use parking_lot::RwLock;
@@ -37,6 +39,7 @@ use crate::{
     errors::install_custom_eyre_handler,
     events::{DownloadEvent, LogEvent, PluginEvent},
     plugin::plugin_manager::PluginManager,
+    youtube::YoutubeClient,
 };
 
 fn generate_context() -> tauri::Context<Wry> {
@@ -59,6 +62,8 @@ pub fn run() {
             get_normal_info,
             get_bangumi_info,
             get_user_video_info,
+            get_youtube_channel,
+            get_youtube_playlist,
             get_fav_folders,
             get_fav_info,
             get_watch_later_info,
@@ -128,6 +133,9 @@ pub fn run() {
 
             let bili_client = BiliClient::new(app.handle().clone());
             app.manage(bili_client);
+
+            let youtube_client = YoutubeClient::new(app.handle().clone());
+            app.manage(youtube_client);
 
             let download_manager = DownloadManager::new(app.handle().clone());
             app.manage(download_manager);

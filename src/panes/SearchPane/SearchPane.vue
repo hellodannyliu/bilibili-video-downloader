@@ -21,8 +21,9 @@ import { extractBvid, extractAid, extractEpId, extractSeasonId, extractUid, extr
 import { useStore } from '../../store.ts'
 import UserVideoPanel from './components/UserVideoPanel.vue'
 import FavPanel from '../FavPane/components/FavPanel.vue'
+import YoutubePanel from './components/YoutubePanel.vue'
 
-export type SearchType = 'Auto' | 'Normal' | 'Bangumi' | 'Cheese' | 'UserVideo' | 'Fav'
+export type SearchType = 'Auto' | 'Normal' | 'Bangumi' | 'Cheese' | 'UserVideo' | 'Fav' | 'Youtube'
 
 const searchTypeOptions: SelectProps['options'] = [
   { label: '自动', value: 'Auto' },
@@ -31,6 +32,7 @@ const searchTypeOptions: SelectProps['options'] = [
   { label: '课程', value: 'Cheese' },
   { label: 'UP投稿', value: 'UserVideo' },
   { label: '收藏夹', value: 'Fav' },
+  { label: 'YouTube', value: 'Youtube' },
 ]
 
 const store = useStore()
@@ -53,8 +55,10 @@ const searchLabel = computed(() => {
     return '个人空间链接 / uid...'
   } else if (searchTypeSelected.value === 'Fav') {
     return '收藏夹链接 / fid...'
+  } else if (searchTypeSelected.value === 'Youtube') {
+    return '视频 / 频道 / 播放列表链接'
   }
-  return '链接 / av... / BV... / ep... / ss... / uid... / fid...'
+  return '链接 / av... / BV... / ep... / ss... / uid... / fid... / YouTube'
 })
 
 async function search(input: string, searchType: SearchType) {
@@ -81,16 +85,38 @@ async function search(input: string, searchType: SearchType) {
     await searchUserVideo(input, isUrl)
   } else if (searchType === 'Fav') {
     await searchFav(input, isUrl)
+  } else if (searchType === 'Youtube') {
+    await searchYoutube(input)
   } else {
     message.error('未知的搜索类型')
   }
   searching.value = false
 }
 
+function looksLikeYoutube(input: string): boolean {
+  const value = input.trim()
+  const lower = value.toLowerCase()
+  if (lower.includes('youtube.com') || lower.includes('youtu.be') || lower.includes('youtube-nocookie.com')) {
+    return true
+  }
+  if (value.startsWith('@') && !value.includes('/')) {
+    return true
+  }
+  if (/^UC[A-Za-z0-9_-]{22}$/.test(value)) {
+    return true
+  }
+  if (value === 'WL' || value === 'LL') {
+    return true
+  }
+  return value.length > 11 && /^(PL|UU|LL|FL|OL|RD|TL|WL|OLAK|PU)[A-Za-z0-9_-]+$/.test(value)
+}
+
 async function searchAuto(input: string, isUrl: boolean) {
   let params: SearchParams | undefined
 
-  if (isUrl) {
+  if (looksLikeYoutube(input)) {
+    params = { Youtube: { input } }
+  } else if (isUrl) {
     const bvid = extractBvid(input)
     const aid = extractAid(input)
     const epId = extractEpId(input)
@@ -291,6 +317,20 @@ async function searchUserVideo(input: string, isUrl: boolean) {
   searchResult.value = result.data
 }
 
+async function searchYoutube(input: string) {
+  if (input === '') {
+    message.error('请输入 YouTube 视频、频道或播放列表链接')
+    return
+  }
+
+  const result = await commands.search({ Youtube: { input } })
+  if (result.status === 'error') {
+    console.error(result.error)
+    return
+  }
+  searchResult.value = result.data
+}
+
 async function searchFav(input: string, isUrl: boolean) {
   let params: GetFavInfoParams | undefined
 
@@ -337,7 +377,7 @@ defineExpose({ search })
         clearable
         @keydown.enter="search(searchInput.trim(), searchTypeSelected)" />
       <n-select
-        class="w-15%"
+        class="min-w-28 w-22%"
         v-model:value="searchTypeSelected"
         :options="searchTypeOptions"
         :show-checkmark="false"
@@ -365,6 +405,7 @@ defineExpose({ search })
       <CheesePanel v-else-if="'Cheese' in searchResult" :cheese-result="searchResult.Cheese" />
       <UserVideoPanel v-else-if="'UserVideo' in searchResult" v-model:user-video-result="searchResult.UserVideo" />
       <FavPanel v-else-if="'Fav' in searchResult" :fav-info="searchResult.Fav" />
+      <YoutubePanel v-else-if="'Youtube' in searchResult" v-model:result="searchResult.Youtube" />
     </div>
   </div>
 </template>

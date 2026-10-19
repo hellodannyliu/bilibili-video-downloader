@@ -1,4 +1,4 @@
-﻿use std::{sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 
 use eyre::WrapErr;
 use parking_lot::RwLock;
@@ -34,7 +34,7 @@ impl DownloadTask {
     #[allow(clippy::too_many_lines)]
     #[instrument(level = "error", skip_all)]
     pub fn from_params(app: &AppHandle, params: &CreateDownloadTaskParams) -> Vec<Arc<Self>> {
-        use CreateDownloadTaskParams::{Bangumi, Cheese, Normal};
+        use CreateDownloadTaskParams::{Bangumi, Cheese, Normal, Youtube};
 
         let mut progresses = Vec::new();
         match params {
@@ -109,6 +109,31 @@ impl DownloadTask {
                             continue;
                         }
                     };
+
+                    progresses.push(progress);
+                }
+            }
+            Youtube(params) => {
+                for item in &params.videos {
+                    let span = tracing::error_span!(
+                        "from_params_youtube",
+                        video_id = item.video_id,
+                        collection_title = params.collection_title,
+                        episode_title = item.title,
+                        up_name = item.channel_name,
+                    );
+                    let _enter = span.enter();
+
+                    let progress =
+                        match DownloadProgress::from_youtube(app, item, &params.collection_title) {
+                            Ok(progress) => progress,
+                            Err(err) => {
+                                let err_title = "创建 YouTube 视频的下载进度失败";
+                                let message = err.to_message();
+                                tracing::error!(err_title, message);
+                                continue;
+                            }
+                        };
 
                     progresses.push(progress);
                 }
