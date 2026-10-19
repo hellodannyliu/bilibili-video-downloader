@@ -45,6 +45,10 @@ use crate::{
         user_info::UserInfo,
         user_video_info::UserVideoInfo,
         watch_later_info::WatchLaterInfo,
+        youtube::{
+            GetYoutubeChannelParams, GetYoutubePlaylistParams, YoutubeChannelInfo,
+            YoutubePlaylistInfo,
+        },
     },
 };
 
@@ -88,6 +92,7 @@ pub fn save_config(app: AppHandle, config: Config) -> CommandResult<()> {
 
     if proxy_changed {
         bili_client.reload_client();
+        app.get_youtube_client().reload_client();
     }
 
     if file_logger_changed {
@@ -323,7 +328,7 @@ pub fn restore_download_tasks(app: AppHandle) -> CommandResult<()> {
 #[specta::specta]
 #[instrument(level = "error", skip_all)]
 pub async fn search(app: AppHandle, params: SearchParams) -> CommandResult<SearchResult> {
-    use SearchParams::{Bangumi, Cheese, Fav, Normal, UserVideo};
+    use SearchParams::{Bangumi, Cheese, Fav, Normal, UserVideo, Youtube};
     let bili_client = app.get_bili_client();
     let search_result = match params {
         Normal(params) => {
@@ -387,8 +392,46 @@ pub async fn search(app: AppHandle, params: SearchParams) -> CommandResult<Searc
                 .map_err(|err| CommandError::from("获取收藏夹内容失败", err))?;
             SearchResult::Fav(FavSearchResult(info))
         }
+        Youtube(params) => {
+            let info = app
+                .get_youtube_client()
+                .search(&params.input)
+                .await
+                .map_err(|err| CommandError::from("获取 YouTube 内容失败", err))?;
+            SearchResult::Youtube(info)
+        }
     };
     Ok(search_result)
+}
+
+#[tauri::command(async)]
+#[specta::specta]
+#[instrument(level = "error", skip_all)]
+pub async fn get_youtube_channel(
+    app: AppHandle,
+    params: GetYoutubeChannelParams,
+) -> CommandResult<YoutubeChannelInfo> {
+    let info = app
+        .get_youtube_client()
+        .get_channel(&params.channel_id, params.continuation.as_deref())
+        .await
+        .map_err(|err| CommandError::from("获取 YouTube 频道视频失败", err))?;
+    Ok(info)
+}
+
+#[tauri::command(async)]
+#[specta::specta]
+#[instrument(level = "error", skip_all)]
+pub async fn get_youtube_playlist(
+    app: AppHandle,
+    params: GetYoutubePlaylistParams,
+) -> CommandResult<YoutubePlaylistInfo> {
+    let info = app
+        .get_youtube_client()
+        .get_playlist(&params.playlist_id, params.continuation.as_deref())
+        .await
+        .map_err(|err| CommandError::from("获取 YouTube 播放列表失败", err))?;
+    Ok(info)
 }
 
 #[allow(clippy::needless_pass_by_value)]

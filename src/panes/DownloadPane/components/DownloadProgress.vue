@@ -19,7 +19,7 @@ import { computed, DeepReadonly, inject } from 'vue'
 import ColorfulTag from '../../../components/ColorfulTag.vue'
 import { searchPaneRefKey } from '../../../injection_keys.ts'
 import { ProgressData } from '../DownloadPane.vue'
-import { ensureHttps, getAudioQualityName, getCodecTypeName, getVideoQualityName } from '../../../utils.tsx'
+import { getAudioQualityName, getCodecTypeName, getVideoQualityName, mediaImage } from '../../../utils.tsx'
 import IconButton from '../../../components/IconButton.vue'
 import ModifyProgressDialogContent from './ModifyProgressDialogContent.vue'
 
@@ -123,6 +123,8 @@ const href = computed<string>(() => {
     return `https://www.bilibili.com/bangumi/play/ep${props.p.ep_id}`
   } else if (props.p.episode_type === 'Cheese') {
     return `https://www.bilibili.com/cheese/play/ep${props.p.ep_id}`
+  } else if (props.p.episode_type === 'Youtube' && props.p.youtube_video_id !== null) {
+    return `https://www.youtube.com/watch?v=${props.p.youtube_video_id}`
   }
   return 'https://www.bilibili.com/'
 })
@@ -134,6 +136,8 @@ function handleSearchClick() {
     searchPaneRef?.value?.search(`ep${props.p.ep_id}`, 'Bangumi')
   } else if (props.p.episode_type === 'Cheese' && props.p.ep_id !== null) {
     searchPaneRef?.value?.search(`ep${props.p.ep_id}`, 'Cheese')
+  } else if (props.p.episode_type === 'Youtube' && props.p.youtube_video_id !== null) {
+    searchPaneRef?.value?.search(props.p.youtube_video_id, 'Youtube')
   }
 }
 
@@ -157,7 +161,7 @@ function handleModifyClick() {
       <div class="relative">
         <img
           class="w-224px h-140px rounded-lg object-cover lazyload"
-          :data-src="`${ensureHttps(p.cover_task.url)}@672w_378h_1c.webp`"
+          :data-src="mediaImage(p.cover_task.url, '@672w_378h_1c.webp')"
           :key="p.cover_task.url"
           alt=""
           draggable="false" />
@@ -252,10 +256,10 @@ function handleModifyClick() {
     <div class="flex mt-2 gap-2">
       <UpInfoBadge
         class="w-40"
-        v-if="p.up_name !== null && p.up_avatar !== null && p.up_uid !== null"
+        v-if="p.up_name !== null && p.up_avatar !== null && (p.up_uid !== null || p.episode_type === 'Youtube')"
         :up-name="p.up_name"
         :up-avatar="p.up_avatar"
-        :up-uid="p.up_uid" />
+        :up-uid="p.up_uid ?? undefined" />
 
       <div v-if="p.state !== 'Completed'" :class="[colorClass, 'flex items-center w-100']">
         <n-icon :size="22">

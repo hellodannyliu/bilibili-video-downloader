@@ -40,6 +40,15 @@ impl DanmakuTask {
         download_task: &Arc<DownloadTask>,
         progress: &DownloadProgress,
     ) -> eyre::Result<()> {
+        if progress.episode_type == crate::downloader::episode_type::EpisodeType::Youtube {
+            tracing::debug!("YouTube 视频没有弹幕，已跳过");
+            download_task.update_progress(|p| {
+                p.danmaku_task.skipped = true;
+                p.danmaku_task.completed = true;
+            });
+            return Ok(());
+        }
+
         let danmaku_task = &progress.danmaku_task;
         let (episode_dir, filename) = (&progress.episode_dir, &progress.filename);
 

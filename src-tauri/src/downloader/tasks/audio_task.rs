@@ -290,6 +290,15 @@ impl AudioTask {
         }
     }
 
+    pub fn assign_direct(&mut self, url: String, content_length: u64, audio_quality: AudioQuality) {
+        self.url = url;
+        self.audio_quality = audio_quality;
+        if self.content_length != content_length {
+            self.content_length = content_length;
+            self.chunks = build_chunks(content_length);
+        }
+    }
+
     pub fn mark_uncompleted(&mut self) {
         self.completed = false;
         self.chunks.iter_mut().for_each(|chunk| {
@@ -437,6 +446,25 @@ impl AudioTask {
 struct MediaForPrepare {
     pub id: i64,
     pub url_with_content_length: Vec<(String, u64)>,
+}
+
+fn build_chunks(content_length: u64) -> Vec<MediaChunk> {
+    if content_length == 0 {
+        return Vec::new();
+    }
+    let chunk_count = content_length.div_ceil(CHUNK_SIZE);
+    #[allow(clippy::cast_possible_truncation)]
+    let mut chunks = Vec::with_capacity(chunk_count as usize);
+    for i in 0..chunk_count {
+        let start = i * CHUNK_SIZE;
+        let end = std::cmp::min(start + CHUNK_SIZE, content_length) - 1;
+        chunks.push(MediaChunk {
+            start,
+            end,
+            completed: false,
+        });
+    }
+    chunks
 }
 
 fn select_exact_match_media(

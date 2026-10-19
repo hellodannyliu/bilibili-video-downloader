@@ -165,6 +165,7 @@ pub mod v1 {
         Normal,
         Bangumi,
         Cheese,
+        Youtube,
     }
 
     #[derive(Default, Debug, Clone, Copy, Hash, Eq, PartialEq, Serialize, Deserialize)]
@@ -345,5 +346,6 @@ pub mod v1 {
         pub completed_ts: Option<u64>,
         pub is_drm: bool,
         pub is_preview: bool,
+        pub youtube_video_id: Option<String>,
     }
 }

@@ -179,6 +179,38 @@ export function useEpisodeSelection() {
   }
 }
 
+export function useKeyedSelection() {
+  const selectedIds = ref<Set<string>>(new Set())
+
+  function extractIds(elements: Element[]): string[] {
+    return elements
+      .map((element) => element.getAttribute('data-key'))
+      .filter((id): id is string => id !== null && id !== '')
+  }
+
+  function updateSelectedIds({
+    store: {
+      changed: { added, removed },
+    },
+  }: SelectionEvent) {
+    extractIds(added).forEach((id) => selectedIds.value.add(id))
+    extractIds(removed).forEach((id) => selectedIds.value.delete(id))
+  }
+
+  function unselectAll({ event, selection }: SelectionEvent) {
+    if (!event?.ctrlKey && !event?.metaKey) {
+      selection.clearSelection()
+      selectedIds.value.clear()
+    }
+  }
+
+  return {
+    selectedIds,
+    updateSelectedIds,
+    unselectAll,
+  }
+}
+
 export function playTaskToQueueAnimation(from: Element, to: Element) {
   const startRect = from.getBoundingClientRect()
   const endRect = to.getBoundingClientRect()
@@ -231,10 +263,26 @@ export function useEpisodeCard(
 }
 
 export function ensureHttps(url: string): string {
+  if (url.startsWith('//')) {
+    return `https:${url}`
+  }
   if (url.startsWith('http://')) {
     return url.replace('http://', 'https://')
   }
   return url
+}
+
+export function mediaImage(url: string, bilibiliSuffix = ''): string {
+  const https = ensureHttps(url)
+  if (
+    https.includes('ytimg.com') ||
+    https.includes('ggpht.com') ||
+    https.includes('googleusercontent.com') ||
+    https.includes('youtube.com')
+  ) {
+    return https
+  }
+  return `${https}${bilibiliSuffix}`
 }
 
 const videoQualityNameMap: Record<VideoQuality, string> = {

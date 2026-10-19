@@ -9,6 +9,7 @@ use crate::{
     downloader::{download_manager::DownloadManager, download_progress::DownloadProgress},
     plugin::plugin_manager::PluginManager,
     types::player_info::PlayerInfo,
+    youtube::YoutubeClient,
 };
 
 pub trait EyreReportToMessage {
@@ -24,6 +25,7 @@ impl EyreReportToMessage for eyre::Report {
 pub trait AppHandleExt {
     fn get_config(&self) -> State<'_, RwLock<Config>>;
     fn get_bili_client(&self) -> State<'_, BiliClient>;
+    fn get_youtube_client(&self) -> State<'_, YoutubeClient>;
     fn get_download_manager(&self) -> State<'_, DownloadManager>;
     fn get_plugin_manager(&self) -> State<'_, PluginManager>;
 }
@@ -34,6 +36,9 @@ impl AppHandleExt for AppHandle {
     }
     fn get_bili_client(&self) -> State<'_, BiliClient> {
         self.state::<BiliClient>()
+    }
+    fn get_youtube_client(&self) -> State<'_, YoutubeClient> {
+        self.state::<YoutubeClient>()
     }
     fn get_download_manager(&self) -> State<'_, DownloadManager> {
         self.state::<DownloadManager>()

@@ -11,6 +11,7 @@ use crate::{
         chapter_segments::{ChapterSegment, ChapterSegments},
         download_progress::DownloadProgress,
         download_task::DownloadTask,
+        episode_type::EpisodeType,
     },
     extensions::{AppHandleExt, GetOrInitPlayerInfo},
     types::player_info::PlayerInfo,
@@ -350,17 +351,21 @@ impl VideoProcessTask {
         };
 
         if self.embed_chapter_selected {
-            let player_info = player_info.get_or_init(app, progress).await?;
-            let segments = player_info
-                .view_points
-                .iter()
-                .map(|vp| ChapterSegment {
-                    title: vp.content.clone(),
-                    start: vp.from,
-                    end: vp.to,
-                })
-                .collect();
-            chapter_segments = ChapterSegments { segments };
+            chapter_segments = if progress.episode_type == EpisodeType::Youtube {
+                youtube_chapter_segments(app, progress).await?
+            } else {
+                let player_info = player_info.get_or_init(app, progress).await?;
+                let segments = player_info
+                    .view_points
+                    .iter()
+                    .map(|vp| ChapterSegment {
+                        title: vp.content.clone(),
+                        start: vp.from,
+                        end: vp.to,
+                    })
+                    .collect();
+                ChapterSegments { segments }
+            };
         }
 
         if let (true, Some(bvid)) = (self.embed_skip_selected, &progress.bvid) {
@@ -387,4 +392,40 @@ impl VideoProcessTask {
 
         Ok(Some(metadata_path))
     }
+}
+
+async fn youtube_chapter_segments(
+    app: &AppHandle,
+    progress: &DownloadProgress,
+) -> eyre::Result<ChapterSegments> {
+    let Some(video_id) = progress.youtube_video_id.as_deref() else {
+        return Ok(ChapterSegments {
+            segments: Vec::new(),
+        });
+    };
+    let info = app
+        .get_youtube_client()
+        .get_video(video_id)
+        .await
+        .wrap_err("获取 YouTube 章节失败")?;
+    let duration = i64::try_from(progress.duration).unwrap_or(i64::MAX);
+    let mut segments = Vec::new();
+    for (index, chapter) in info.chapters.iter().enumerate() {
+        #[allow(clippy::cast_possible_truncation)]
+        let start = chapter.start_sec.round() as i64;
+        #[allow(clippy::cast_possible_truncation)]
+        let end = info
+            .chapters
+            .get(index + 1)
+            .map(|next| next.start_sec.round() as i64)
+            .unwrap_or(duration);
+        if end > start {
+            segments.push(ChapterSegment {
+                title: chapter.title.clone(),
+                start,
+                end,
+            });
+        }
+    }
+    Ok(ChapterSegments { segments })
 }

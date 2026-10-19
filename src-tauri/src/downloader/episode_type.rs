@@ -7,4 +7,5 @@ pub enum EpisodeType {
     Normal,
     Bangumi,
     Cheese,
+    Youtube,
 }

@@ -7,6 +7,7 @@ use super::{
     fav_info::FavInfo,
     normal_info::NormalInfo,
     user_video_info::UserVideoInfo,
+    youtube::YoutubeSearchResult,
 };
 
 #[allow(clippy::large_enum_variant)]
@@ -17,6 +18,7 @@ pub enum SearchResult {
     Cheese(CheeseSearchResult),
     UserVideo(UserVideoSearchResult),
     Fav(FavSearchResult),
+    Youtube(YoutubeSearchResult),
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, Type)]

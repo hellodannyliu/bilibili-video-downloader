@@ -9,6 +9,7 @@ use crate::{
         bangumi_info::BangumiInfo, cheese_info::CheeseInfo,
         get_bangumi_info_params::GetBangumiInfoParams, get_cheese_info_params::GetCheeseInfoParams,
         get_normal_info_params::GetNormalInfoParams, normal_info::NormalInfo,
+        youtube::YoutubeVideoInfo,
     },
 };
 
@@ -17,6 +18,7 @@ pub enum EpisodeInfo {
     Normal(NormalInfo),
     Bangumi(BangumiInfo, i64),
     Cheese(CheeseInfo, i64),
+    Youtube(YoutubeVideoInfo),
 }
 
 pub trait GetOrInitEpisodeInfo {
@@ -64,6 +66,18 @@ impl GetOrInitEpisodeInfo for Option<EpisodeInfo> {
                     .await
                     .wrap_err("获取课程信息失败")?;
                 EpisodeInfo::Cheese(info, ep_id)
+            }
+            EpisodeType::Youtube => {
+                let video_id = progress
+                    .youtube_video_id
+                    .clone()
+                    .ok_or_eyre("youtube_video_id为None")?;
+                let info = app
+                    .get_youtube_client()
+                    .get_video(&video_id)
+                    .await
+                    .wrap_err("获取 YouTube 视频信息失败")?;
+                EpisodeInfo::Youtube(info)
             }
         };
 

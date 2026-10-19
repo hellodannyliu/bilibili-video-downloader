@@ -17,6 +17,7 @@ use crate::{
     extensions::AppHandleExt,
     types::{
         bangumi_info::BangumiInfo, cheese_info::CheeseInfo, normal_info::NormalInfo, tags::Tags,
+        youtube::YoutubeVideoInfo,
     },
 };
 
@@ -60,6 +61,9 @@ impl NfoTask {
             EpisodeInfo::Cheese(info, ep_id) => {
                 self.process_cheese(download_task, progress, info, ep_id)
                     .await?;
+            }
+            EpisodeInfo::Youtube(info) => {
+                self.process_youtube(download_task, progress, info).await?;
             }
         }
 
@@ -229,6 +233,76 @@ impl NfoTask {
 
         download_task.update_progress(|p| p.nfo_task.completed = true);
 
+        Ok(())
+    }
+
+    #[instrument(level = "error", skip_all)]
+    async fn process_youtube(
+        &self,
+        download_task: &Arc<DownloadTask>,
+        progress: &DownloadProgress,
+        info: &YoutubeVideoInfo,
+    ) -> eyre::Result<()> {
+        let (episode_dir, filename) = (&progress.episode_dir, &progress.filename);
+        let nfo_path = episode_dir.join(format!("{filename}.nfo"));
+
+        let file_exist_action = download_task.app.get_config().read().file_exist_action;
+        if file_exist_action == FileExistAction::Skip && nfo_path.exists() {
+            tracing::debug!("NFO文件已存在，跳过下载");
+            download_task.update_progress(|p| {
+                p.nfo_task.skipped = true;
+                p.nfo_task.completed = true;
+            });
+            return Ok(());
+        }
+
+        let (premiered, year) = if info.published_at > 0 {
+            let date_time = DateTime::from_timestamp(info.published_at, 0)
+                .ok_or_eyre("YouTube 发布时间无效")?
+                .with_timezone(&chrono::Local);
+            (date_time.format("%Y-%m-%d").to_string(), date_time.year())
+        } else {
+            (String::new(), 0)
+        };
+        let set = if progress.collection_title != progress.episode_title {
+            Some(Set {
+                name: progress.collection_title.clone(),
+                overview: String::new(),
+            })
+        } else {
+            None
+        };
+        let movie = Movie {
+            title: info.title.clone(),
+            plot: info.description.clone(),
+            tagline: None,
+            runtime: info.duration / 60,
+            premiered,
+            year,
+            studio: vec!["YouTube".to_string()],
+            genre: vec!["YouTube".to_string()],
+            tag: info.tags.clone(),
+            country: Vec::new(),
+            set,
+            director: vec![info.channel_name.clone()],
+            actor: vec![Actor {
+                name: info.channel_name.clone(),
+                role: "频道".to_string(),
+                order: 0,
+                thumb: info.channel_avatar.clone(),
+            }],
+        };
+        let cfg = yaserde::ser::Config {
+            perform_indent: true,
+            ..Default::default()
+        };
+        let nfo = yaserde::ser::to_string_with_config(&movie, &cfg).map_err(|err| eyre!(err))?;
+        std::fs::write(&nfo_path, nfo).wrap_err(format!(
+            "保存 YouTube 视频 NFO 到`{}`失败",
+            nfo_path.display()
+        ))?;
+
+        download_task.update_progress(|p| p.nfo_task.completed = true);
         Ok(())
     }
 }
