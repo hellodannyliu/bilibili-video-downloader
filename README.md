@@ -16,7 +16,17 @@
 
 ## 📥 快速下载
 
-[Release页面](https://github.com/lanyeeee/bilibili-video-downloader/releases)提供了预编译的安装包，直接下载即可使用
+[v0.2.2 Release](https://github.com/hellodannyliu/bilibili-video-downloader/releases/tag/v0.2.2) 提供已经编译好的安装包，直接下载即可使用。这一版包含哔哩哔哩下载，以及 YouTube 视频、频道和播放列表下载。
+
+| 系统             | 下载                                                                                                                                                                                                           |
+| :--------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Windows 安装包   | [bilibili-video-downloader_0.2.2_windows_x64.exe](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_windows_x64.exe)                         |
+| Windows 便携版   | [bilibili-video-downloader_0.2.2_windows_x64_portable.zip](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_windows_x64_portable.zip)       |
+| Linux .deb       | [bilibili-video-downloader_0.2.2_linux_amd64.deb](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_linux_amd64.deb)                         |
+| Linux .rpm       | [bilibili-video-downloader_0.2.2_linux_amd64.rpm](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_linux_amd64.rpm)                         |
+| Linux 便携版     | [bilibili-video-downloader_0.2.2_linux_amd64_portable.tar.gz](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_linux_amd64_portable.tar.gz) |
+| macOS Apple 芯片 | [bilibili-video-downloader_0.2.2_macos_aarch64.dmg](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_macos_aarch64.dmg)                     |
+| macOS Intel      | [bilibili-video-downloader_0.2.2_macos_x86_64.dmg](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_macos_x86_64.dmg)                       |
 
 **如果本项目对你有帮助，欢迎点个 Star ⭐ 支持！你的支持是我持续更新维护的动力 🙏**
 
@@ -79,7 +89,7 @@ https://github.com/user-attachments/assets/adf84b93-684f-43f3-9948-6ba527213812
 我能想到的解决办法只有：
 
 1. 根据下面的**如何构建(build)**，自行编译
-2. 希望你相信我的承诺，我承诺你在[Release页面](https://github.com/lanyeeee/bilibili-video-downloader/releases)下载到的所有东西都是安全的。切勿轻信他人分享的文件，请**仅**在[Release页面](https://github.com/lanyeeee/bilibili-video-downloader/releases)下载。任何不是从该页面下载的版本均可能**已被篡改**并**真的包含病毒**(而非误报)，包括但不限于`网盘`、`通过邮箱或社交软件分享`、`issue或discussion里的文件`、`其他fork(仓库)`、`其他网站`
+2. 希望你相信我的承诺，我承诺你在[Release页面](https://github.com/hellodannyliu/bilibili-video-downloader/releases)下载到的所有东西都是安全的。切勿轻信他人分享的文件，请**仅**在[Release页面](https://github.com/hellodannyliu/bilibili-video-downloader/releases)下载。任何不是从该页面下载的版本均可能**已被篡改**并**真的包含病毒**(而非误报)，包括但不限于`网盘`、`通过邮箱或社交软件分享`、`issue或discussion里的文件`、`其他fork(仓库)`、`其他网站`
 
 ## 🛠️如何构建(build)
 
@@ -164,7 +174,17 @@ Search for a YouTube downloader, YouTube to MP4, YouTube channel downloader, or 
 
 ## 📥 Download
 
-Prebuilt installers are on the [releases page](https://github.com/lanyeeee/bilibili-video-downloader/releases).
+Prebuilt installers for [v0.2.2](https://github.com/hellodannyliu/bilibili-video-downloader/releases/tag/v0.2.2) include Bilibili downloads and YouTube video, channel, and playlist downloads.
+
+| System              | Download                                                                                                                                                                                                       |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Windows installer   | [bilibili-video-downloader_0.2.2_windows_x64.exe](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_windows_x64.exe)                         |
+| Windows portable    | [bilibili-video-downloader_0.2.2_windows_x64_portable.zip](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_windows_x64_portable.zip)       |
+| Linux .deb          | [bilibili-video-downloader_0.2.2_linux_amd64.deb](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_linux_amd64.deb)                         |
+| Linux .rpm          | [bilibili-video-downloader_0.2.2_linux_amd64.rpm](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_linux_amd64.rpm)                         |
+| Linux portable      | [bilibili-video-downloader_0.2.2_linux_amd64_portable.tar.gz](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_linux_amd64_portable.tar.gz) |
+| macOS Apple silicon | [bilibili-video-downloader_0.2.2_macos_aarch64.dmg](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_macos_aarch64.dmg)                     |
+| macOS Intel         | [bilibili-video-downloader_0.2.2_macos_x86_64.dmg](https://github.com/hellodannyliu/bilibili-video-downloader/releases/download/v0.2.2/bilibili-video-downloader_0.2.2_macos_x86_64.dmg)                       |
 
 **If this project helps you, a Star ⭐ really helps it stay maintained.**
 
@@ -226,7 +246,7 @@ https://github.com/user-attachments/assets/adf84b93-684f-43f3-9948-6ba527213812
 Unsigned personal apps are often flagged. A certificate, or paying a vendor, is the usual way out, and neither is realistic here.
 
 1. Build it yourself with the steps below.
-2. The files on the [releases page](https://github.com/lanyeeee/bilibili-video-downloader/releases) are the ones published by this project. Download **only** from that page. Copies from cloud drives, email, chat apps, issues, discussions, other forks, or other websites may have been modified and may actually contain malware.
+2. The files on the [releases page](https://github.com/hellodannyliu/bilibili-video-downloader/releases) are the ones published by this project. Download **only** from that page. Copies from cloud drives, email, chat apps, issues, discussions, other forks, or other websites may have been modified and may actually contain malware.
 
 ## 🛠️ Build
 

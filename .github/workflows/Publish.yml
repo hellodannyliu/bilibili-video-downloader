@@ -213,11 +213,17 @@ jobs:
         with:
           name: Desktop App v${{ needs.windows-build.outputs.VERSION }}
           body: |
-            Take a look at the assets to download and install this app.
+            哔哩哔哩与 YouTube 桌面下载器。
+
+            - Windows: `bilibili-video-downloader_${{ needs.windows-build.outputs.VERSION }}_windows_x64.exe`
+            - Linux: `.deb`、`.rpm` 与 portable `.tar.gz`
+            - macOS: Apple 芯片与 Intel 的 `.dmg`
+
+            Bilibili and YouTube desktop downloader. Installers for Windows, Linux, and macOS are attached.
           files: |
             artifacts/windows/*
             artifacts/linux/*
             artifacts/macos-aarch64/*
             artifacts/macos-x86_64/*
-          draft: true
+          draft: false
           prerelease: false
